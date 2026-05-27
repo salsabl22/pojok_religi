@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pojok Religi</title>
+    <meta name="description" content="Asisten AI untuk tanya jawab seputar agama, spiritualitas, dan kehidupan.">
+    <link rel="shortcut icon" href="/static/icon/mosque.png" type="image/png">
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT"
+        crossorigin="anonymous"
+    >
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- ============================================================
+     AUTH OVERLAY
+     Ditampilkan saat user belum login. Berisi form Login & Register.
+     ============================================================ -->
+<div class="auth-overlay" id="auth-overlay">
+    <div class="auth-card">
+
+        <div class="auth-logo">
+            <img src="/static/icon/mosque.png" alt="Logo Pojok Religi" width="48">
+            <h1>Pojok Religi</h1>
+            <p>Tanya apa saja seputar agama &amp; spiritualitas</p>
+        </div>
+
+        <!-- Tab: Masuk / Daftar -->
+        <div class="auth-tabs" role="tablist">
+            <button
+                class="auth-tab auth-tab--active"
+                id="tab-login"
+                role="tab"
+                aria-selected="true"
+                onclick="switchAuthTab('login')"
+            >Masuk</button>
+            <button
+                class="auth-tab"
+                id="tab-register"
+                role="tab"
+                aria-selected="false"
+                onclick="switchAuthTab('register')"
+            >Daftar</button>
+        </div>
+
+        <!-- Form: Masuk -->
+        <div id="form-login" role="tabpanel">
+            <div class="auth-field">
+                <label for="login-username">Username</label>
+                <input
+                    type="text"
+                    id="login-username"
+                    placeholder="Masukkan username"
+                    autocomplete="username"
+                >
+            </div>
+            <div class="auth-field">
+                <label for="login-password">Password</label>
+                <input
+                    type="password"
+                    id="login-password"
+                    placeholder="Masukkan password"
+                    autocomplete="current-password"
+                >
+            </div>
+            <p class="auth-message" id="login-message"></p>
+            <button class="auth-btn" onclick="handleLogin()">Masuk</button>
+        </div>
+
+        <!-- Form: Daftar -->
+        <div id="form-register" role="tabpanel" style="display:none;">
+            <div class="auth-field">
+                <label for="reg-username">Username</label>
+                <input
+                    type="text"
+                    id="reg-username"
+                    placeholder="Buat username (min. 3 karakter)"
+                    autocomplete="username"
+                >
+            </div>
+            <div class="auth-field">
+                <label for="reg-password">Password</label>
+                <input
+                    type="password"
+                    id="reg-password"
+                    placeholder="Buat password (min. 4 karakter)"
+                    autocomplete="new-password"
+                >
+            </div>
+            <div class="auth-field">
+                <label for="reg-confirm">Konfirmasi Password</label>
+                <input
+                    type="password"
+                    id="reg-confirm"
+                    placeholder="Ulangi password"
+                    autocomplete="new-password"
+                >
+            </div>
+            <p class="auth-message" id="reg-message"></p>
+            <button class="auth-btn" onclick="handleRegister()">Daftar</button>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL: EDIT PROFIL
+     User dapat mengganti password melalui modal ini.
+     ============================================================ -->
+<div class="modal-overlay" id="edit-profile-overlay" style="display:none;" onclick="closeEditProfile()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Edit Profil</h2>
+            <button class="modal-close-btn" onclick="closeEditProfile()" aria-label="Tutup modal">&#10005;</button>
+        </div>
+        <div class="auth-field">
+            <label for="edit-old-password">Password Lama</label>
+            <input type="password" id="edit-old-password" placeholder="Masukkan password lama">
+        </div>
+        <div class="auth-field">
+            <label for="edit-new-password">Password Baru</label>
+            <input type="password" id="edit-new-password" placeholder="Minimal 4 karakter">
+        </div>
+        <div class="auth-field">
+            <label for="edit-confirm-password">Konfirmasi Password Baru</label>
+            <input type="password" id="edit-confirm-password" placeholder="Ulangi password baru">
+        </div>
+        <p class="auth-message" id="edit-profile-message"></p>
+        <button class="auth-btn" onclick="handleEditProfile()">Simpan Perubahan</button>
+    </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL: KONFIRMASI HAPUS SEMUA PERCAKAPAN
+     ============================================================ -->
+<div class="modal-overlay" id="delete-all-overlay" style="display:none;" onclick="closeDeleteAllModal()">
+    <div class="modal-card modal-card--danger" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Hapus Semua Percakapan</h2>
+            <button class="modal-close-btn" onclick="closeDeleteAllModal()" aria-label="Tutup modal">&#10005;</button>
+        </div>
+        <p class="modal-desc">
+            Apakah kamu yakin ingin menghapus <strong>semua riwayat percakapan</strong>?
+            Tindakan ini tidak dapat dibatalkan.
+        </p>
+        <div class="modal-actions">
+            <button class="btn-modal-cancel" onclick="closeDeleteAllModal()">Batal</button>
+            <button class="btn-modal-danger" onclick="confirmDeleteAll()">Ya, Hapus Semua</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ============================================================
+     TOAST NOTIFICATION
+     Pop-up ringan untuk notifikasi: error, info, sukses.
+     ============================================================ -->
+<div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+
+<!-- ============================================================
+     APP LAYOUT
+     ============================================================ -->
+<div class="app-layout">
+
+    <!-- ── Sidebar ──────────────────────────────────────────── -->
+    <aside class="sidebar" id="sidebar" aria-label="Sidebar navigasi">
+
+        <div class="sidebar-header">
+            <span class="sidebar-brand">Pojok Religi</span>
+            <button class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Tutup sidebar">&#10005;</button>
+        </div>
+
+        <button class="btn-new-chat" id="btn-new-chat">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+            Percakapan Baru
+        </button>
+
+        <div class="sidebar-section-label">Riwayat</div>
+        <nav class="sidebar-nav" id="conv-list" aria-label="Daftar percakapan"></nav>
+
+        <div class="sidebar-footer">
+            <button class="sidebar-footer-btn sidebar-footer-btn--danger" id="btn-delete-all">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                Hapus Semua Riwayat
+            </button>
+        </div>
+
+    </aside>
+
+    <!-- ── Main Content ─────────────────────────────────────── -->
+    <main class="main-wrapper">
+
+        <!-- Topbar -->
+        <div class="topbar">
+            <div class="topbar-left">
+                <button class="topbar-menu-btn" id="sidebar-toggle-btn" aria-label="Toggle sidebar">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+                <span class="topbar-title">Pojok Religi</span>
+            </div>
+
+            <div class="topbar-right">
+
+                <!-- Tombol ganti tema -->
+                <button class="theme-toggle" id="theme-toggle-btn" aria-label="Ganti tema">
+                    <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                    </svg>
+                    <svg id="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:none;">
+                        <circle cx="12" cy="12" r="5"/>
+                        <path stroke-linecap="round" d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                    </svg>
+                    <span id="theme-label">Dark</span>
+                </button>
+
+                <!-- Dropdown profil: Edit & Logout -->
+                <div class="profile-dropdown-wrapper" id="profile-dropdown-wrapper">
+                    <button
+                        class="profile-btn"
+                        id="profile-btn"
+                        onclick="toggleProfileDropdown()"
+                        aria-label="Menu profil"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                    >
+                        <span class="profile-avatar">👤</span>
+                        <span class="profile-greeting" id="profile-greeting">Halo, —</span>
+                        <svg class="profile-chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="profile-dropdown" id="profile-dropdown" style="display:none;">
+                        <button class="profile-dropdown-item" onclick="openEditProfile(); closeProfileDropdown()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                            Edit Profil
+                        </button>
+                        <button class="profile-dropdown-item profile-dropdown-item--danger" onclick="handleLogout()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                            </svg>
+                            Logout
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Konten utama: welcome, chat, input -->
+        <div class="main-container">
+
+            <!-- Welcome screen -->
+            <div class="welcome-screen" id="welcome-screen">
+                <img src="/static/icon/mosque.png" alt="Ikon masjid">
+                <h1>Pojok Religi</h1>
+                <p>Tanya apa saja seputar agama, spiritualitas &amp; kehidupan</p>
+            </div>
+
+            <!-- Area percakapan -->
+            <div class="chat-history chat-history--empty" id="chat-history" role="log" aria-live="polite"></div>
+
+            <!-- Preview file yang dipilih -->
+            <div class="file-preview" id="file-preview">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828L18 9.828A4 4 0 1012.343 4.343L5.757 10.93a6 6 0 108.485 8.485L20 13.657"/>
+                </svg>
+                <span id="file-preview-name"></span>
+                <button id="file-remove-btn" aria-label="Hapus file yang dipilih">&#10005;</button>
+            </div>
+
+            <!-- Form input pesan -->
+            <form id="search-form" novalidate>
+                <div class="search-container">
+                    <label for="file-input" class="btn-upload" title="Upload PDF, gambar (JPG/PNG), atau DOCX">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828L18 9.828A4 4 0 1012.343 4.343L5.757 10.93a6 6 0 108.485 8.485L20 13.657"/>
+                        </svg>
+                    </label>
+                    <input type="file" id="file-input" accept=".pdf,.png,.jpg,.jpeg,.docx" style="display:none;">
+
+                    <div class="input">
+                        <input
+                            type="text"
+                            id="user-input"
+                            name="input"
+                            class="form-control"
+                            placeholder="Tanyakan sesuatu seputar agama..."
+                            aria-label="Tulis pertanyaanmu"
+                            autocomplete="off"
+                            required
+                        >
+                    </div>
+
+                    <button type="submit" id="submit-btn" class="btn-send" aria-label="Kirim pertanyaan">
+                        <img src="/static/icon/button_submit.png" alt="Kirim" width="28">
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </main>
+</div>
+
+<!-- Overlay gelap saat sidebar terbuka di mobile -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+
+<!-- ============================================================
+     JAVASCRIPT
+     Seluruh logika aplikasi dikemas dalam satu IIFE untuk
+     menghindari polusi global scope.
+     ============================================================ -->
+<script>
+(() => {
+    "use strict";
+
+    // ============================================================
+    // STORAGE KEYS
+    // Semua key localStorage dipusatkan di sini agar mudah diubah.
+    // ============================================================
+
+    const STORAGE = {
+        THEME   : "pojokreligi_theme",
+        SIDEBAR : "pojokreligi_sidebar",
+        USERS   : "pojokreligi_users",
+        SESSION : "pojokreligi_session",
+    };
+
+    /**
+     * Menghasilkan storage key percakapan yang unik per user.
+     * Dengan demikian, setiap user memiliki riwayat percakapan sendiri.
+     *
+     * Catatan: Data disimpan di localStorage browser, sehingga riwayat
+     * hanya tersedia di perangkat & browser yang sama. Untuk sinkronisasi
+     * lintas perangkat diperlukan database (saat ini tidak digunakan).
+     *
+     * @param {string} username
+     * @returns {string}
+     */
+    function convStorageKey(username) {
+        return `pojokreligi_convs_${username}`;
+    }
+
+
+    // ============================================================
+    // HELPER: localStorage
+    // ============================================================
+
+    /** Baca nilai JSON dari localStorage. Kembalikan `fallback` jika gagal. */
+    function loadJSON(key, fallback) {
+        try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
+        catch { return fallback; }
+    }
+
+    /** Simpan nilai sebagai JSON ke localStorage. */
+    function saveJSON(key, value) {
+        localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    /** Buat ID unik untuk percakapan baru. */
+    function uid() {
+        return `c_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+    }
+
+    /** Buat judul singkat dari teks pertanyaan user (maks 7 kata). */
+    function makeTitle(text) {
+        const words = text.replace(/[^\w\s]/g, "").trim().split(/\s+/).slice(0, 7).join(" ");
+        return (words.charAt(0).toUpperCase() + words.slice(1)) || "Percakapan Baru";
+    }
+
+
+    // ============================================================
+    // AUTH: USER MANAGEMENT
+    // Autentikasi sederhana berbasis localStorage (tanpa database).
+    // Data user disimpan dalam format: { [username]: { password } }
+    // ============================================================
+
+    /** Ambil semua data user dari localStorage. */
+    function getUsers() {
+        return loadJSON(STORAGE.USERS, {});
+    }
+
+    /** Simpan semua data user ke localStorage. */
+    function saveUsers(users) {
+        saveJSON(STORAGE.USERS, users);
+    }
+
+    /** Ambil sesi aktif. Format: { username } atau null. */
+    function getSession() {
+        return loadJSON(STORAGE.SESSION, null);
+    }
+
+    /** Simpan sesi user yang sedang login. */
+    function setSession(username) {
+        saveJSON(STORAGE.SESSION, { username });
+    }
+
+    /** Hapus sesi (logout). */
+    function clearSession() {
+        localStorage.removeItem(STORAGE.SESSION);
+    }
+
+    /**
+     * Daftarkan user baru.
+     * @returns {Object} - { ok: boolean, error?: string }
+     */
+    function registerUser(username, password) {
+        if (!username || username.length < 3)
+            return { ok: false, error: "Username minimal 3 karakter." };
+        if (!password || password.length < 4)
+            return { ok: false, error: "Password minimal 4 karakter." };
+
+        const users = getUsers();
+        if (users[username])
+            return { ok: false, error: "Username sudah digunakan." };
+
+        users[username] = { password };
+        saveUsers(users);
+        return { ok: true };
+    }
+
+    /**
+     * Login user.
+     * @returns {Object} - { ok: boolean, error?: string }
+     */
+    function loginUser(username, password) {
+        const users = getUsers();
+        if (!users[username])
+            return { ok: false, error: "Username tidak ditemukan." };
+        if (users[username].password !== password)
+            return { ok: false, error: "Password salah." };
+        return { ok: true };
+    }
+
+    /**
+     * Update password user yang sedang login.
+     * @returns {Object} - { ok: boolean, error?: string }
+     */
+    function updatePassword(username, oldPassword, newPassword, confirmPassword) {
+        if (!newPassword || newPassword.length < 4)
+            return { ok: false, error: "Password baru minimal 4 karakter." };
+        if (newPassword !== confirmPassword)
+            return { ok: false, error: "Konfirmasi password tidak cocok." };
+
+        const users = getUsers();
+        if (!users[username] || users[username].password !== oldPassword)
+            return { ok: false, error: "Password lama salah." };
+
+        users[username].password = newPassword;
+        saveUsers(users);
+        return { ok: true };
+    }
+
+
+    // ============================================================
+    // CONVERSATION STORAGE (per user)
+    // Riwayat percakapan disimpan terpisah untuk setiap user.
+    // ============================================================
+
+    /** Ambil semua percakapan milik user yang sedang login. */
+    function loadUserConvs() {
+        const session = getSession();
+        if (!session?.username) return [];
+        return loadJSON(convStorageKey(session.username), []);
+    }
+
+    /** Simpan semua percakapan milik user yang sedang login. */
+    function saveUserConvs(convs) {
+        const session = getSession();
+        if (!session?.username) return;
+        saveJSON(convStorageKey(session.username), convs);
+    }
+
+
+    // ============================================================
+    // DOM REFERENCES
+    // ============================================================
+
+    const authOverlay      = document.getElementById("auth-overlay");
+    const profileGreeting  = document.getElementById("profile-greeting");
+    const editProfileOverlay = document.getElementById("edit-profile-overlay");
+    const deleteAllOverlay = document.getElementById("delete-all-overlay");
+    const toastContainer   = document.getElementById("toast-container");
+    const form             = document.getElementById("search-form");
+    const chatEl           = document.getElementById("chat-history");
+    const userInput        = document.getElementById("user-input");
+    const submitBtn        = document.getElementById("submit-btn");
+    const fileInput        = document.getElementById("file-input");
+    const filePreview      = document.getElementById("file-preview");
+    const filePreviewName  = document.getElementById("file-preview-name");
+    const fileRemoveBtn    = document.getElementById("file-remove-btn");
+    const convList         = document.getElementById("conv-list");
+    const sidebar          = document.getElementById("sidebar");
+    const sidebarOverlay   = document.getElementById("sidebar-overlay");
+    const sidebarToggleBtn = document.getElementById("sidebar-toggle-btn");
+    const sidebarCloseBtn  = document.getElementById("sidebar-close-btn");
+    const btnNewChat       = document.getElementById("btn-new-chat");
+    const btnDeleteAll     = document.getElementById("btn-delete-all");
+    const welcomeScreen    = document.getElementById("welcome-screen");
+    const themeToggleBtn   = document.getElementById("theme-toggle-btn");
+    const themeIconMoon    = document.getElementById("theme-icon-moon");
+    const themeIconSun     = document.getElementById("theme-icon-sun");
+    const themeLabel       = document.getElementById("theme-label");
+    const htmlEl           = document.documentElement;
+
+    // App state
+    let activeConvId = null;
+    let selectedFile = null;
+    const isMobile   = () => window.innerWidth < 768;
+
+
+    // ============================================================
+    // TOAST NOTIFICATION
+    // Pop-up ringan untuk notifikasi penting (error, info, sukses).
+    // ============================================================
+
+    /**
+     * Tampilkan toast pop-up yang otomatis menghilang.
+     * @param {string} message - Teks notifikasi.
+     * @param {"error"|"info"|"success"} type - Jenis notifikasi.
+     * @param {number} duration - Durasi tampil dalam milidetik.
+     */
+    function showToast(message, type = "error", duration = 6000) {
+        const ICONS = { error: "⚠️", success: "✅", info: "ℹ️" };
+
+        const toast = document.createElement("div");
+        toast.className = `toast toast--${type}`;
+        toast.innerHTML = `
+            <span class="toast-icon">${ICONS[type] ?? "ℹ️"}</span>
+            <span class="toast-message">${message}</span>
+            <button class="toast-close" onclick="this.parentElement.remove()" aria-label="Tutup notifikasi">&#10005;</button>
+        `;
+
+        toastContainer.appendChild(toast);
+        requestAnimationFrame(() => toast.classList.add("toast--visible"));
+
+        setTimeout(() => {
+            toast.classList.remove("toast--visible");
+            setTimeout(() => toast.remove(), 350);
+        }, duration);
+    }
+
+
+    // ============================================================
+    // TEMA (Light / Dark)
+    // ============================================================
+
+    function applyTheme(theme) {
+        const isDark = theme === "dark";
+        htmlEl.setAttribute("data-theme", theme);
+        themeIconMoon.style.display = isDark ? "none"  : "block";
+        themeIconSun.style.display  = isDark ? "block" : "none";
+        themeLabel.textContent      = isDark ? "Light" : "Dark";
+        saveJSON(STORAGE.THEME, theme);
+    }
+
+    themeToggleBtn.addEventListener("click", () => {
+        const current = htmlEl.getAttribute("data-theme") || "light";
+        applyTheme(current === "light" ? "dark" : "light");
+    });
+
+    applyTheme(loadJSON(STORAGE.THEME, "light"));
+
+
+    // ============================================================
+    // SIDEBAR
+    // ============================================================
+
+    function openSidebar() {
+        if (isMobile()) {
+            sidebar.classList.add("sidebar--open");
+            sidebarOverlay.classList.add("overlay--visible");
+        } else {
+            sidebar.classList.remove("sidebar--collapsed");
+        }
+        saveJSON(STORAGE.SIDEBAR, "open");
+    }
+
+    function closeSidebar() {
+        if (isMobile()) {
+            sidebar.classList.remove("sidebar--open");
+            sidebarOverlay.classList.remove("overlay--visible");
+        } else {
+            sidebar.classList.add("sidebar--collapsed");
+        }
+        saveJSON(STORAGE.SIDEBAR, "closed");
+    }
+
+    function toggleSidebar() {
+        const isOpen = isMobile()
+            ? sidebar.classList.contains("sidebar--open")
+            : !sidebar.classList.contains("sidebar--collapsed");
+        isOpen ? closeSidebar() : openSidebar();
+    }
+
+    sidebarToggleBtn.addEventListener("click", toggleSidebar);
+    sidebarCloseBtn.addEventListener("click", closeSidebar);
+    sidebarOverlay.addEventListener("click", closeSidebar);
+
+    // Restore state sidebar saat mode desktop
+    if (!isMobile() && loadJSON(STORAGE.SIDEBAR, "open") === "closed") {
+        sidebar.classList.add("sidebar--collapsed");
+    }
+
+    window.addEventListener("resize", () => {
+        if (isMobile()) {
+            sidebar.classList.remove("sidebar--collapsed");
+        } else {
+            sidebar.classList.remove("sidebar--open");
+            sidebarOverlay.classList.remove("overlay--visible");
+            const savedState = loadJSON(STORAGE.SIDEBAR, "open");
+            sidebar.classList.toggle("sidebar--collapsed", savedState === "closed");
+        }
+    });
+
+
+    // ============================================================
+    // WELCOME SCREEN
+    // ============================================================
+
+    function showWelcome() {
+        welcomeScreen.classList.remove("welcome-screen--hidden");
+        chatEl.classList.add("chat-history--empty");
+    }
+
+    function hideWelcome() {
+        welcomeScreen.classList.add("welcome-screen--hidden");
+        chatEl.classList.remove("chat-history--empty");
+    }
+
+
+    // ============================================================
+    // AUTH UI
+    // ============================================================
+
+    function showAuthOverlay() { authOverlay.style.display = "flex"; }
+    function hideAuthOverlay() { authOverlay.style.display = "none"; }
+
+    function updateProfileGreeting(username) {
+        profileGreeting.textContent = `Halo, ${username}`;
+    }
+
+    /**
+     * Tampilkan pesan pada form auth.
+     * @param {string} elementId - ID elemen <p> yang akan diisi.
+     * @param {string} message - Pesan yang ditampilkan.
+     * @param {"error"|"success"} type - Jenis pesan.
+     */
+    function setAuthMessage(elementId, message, type = "error") {
+        const el = document.getElementById(elementId);
+        el.textContent  = message;
+        el.style.color  = type === "success" ? "var(--color-accent)" : "var(--color-danger)";
+    }
+
+    function clearAuthMessages() {
+        ["login-message", "reg-message"].forEach(id => {
+            const el = document.getElementById(id);
+            el.textContent = "";
+            el.style.color = "";
+        });
+    }
+
+    /** Inisialisasi auth: cek sesi, tampilkan auth overlay atau app. */
+    function initAuth() {
+        const session = getSession();
+        if (session?.username) {
+            hideAuthOverlay();
+            updateProfileGreeting(session.username);
+        } else {
+            showAuthOverlay();
+        }
+    }
+
+    /** Alihkan antara tab Masuk dan Daftar. */
+    window.switchAuthTab = function(tab) {
+        const isLogin = tab === "login";
+        document.getElementById("form-login").style.display    = isLogin ? "block" : "none";
+        document.getElementById("form-register").style.display = isLogin ? "none"  : "block";
+        document.getElementById("tab-login").classList.toggle("auth-tab--active", isLogin);
+        document.getElementById("tab-register").classList.toggle("auth-tab--active", !isLogin);
+        document.getElementById("tab-login").setAttribute("aria-selected", String(isLogin));
+        document.getElementById("tab-register").setAttribute("aria-selected", String(!isLogin));
+        clearAuthMessages();
+    };
+
+    /** Proses login. */
+    window.handleLogin = function() {
+        const username = document.getElementById("login-username").value.trim();
+        const password = document.getElementById("login-password").value;
+
+        const result = loginUser(username, password);
+        if (!result.ok) {
+            setAuthMessage("login-message", result.error, "error");
+            return;
+        }
+
+        setSession(username);
+        hideAuthOverlay();
+        updateProfileGreeting(username);
+        activeConvId = null;
+        chatEl.innerHTML = "";
+        showWelcome();
+        renderConvList();
+    };
+
+    /** Proses registrasi. Setelah berhasil, user diarahkan ke tab Login. */
+    window.handleRegister = function() {
+        const username = document.getElementById("reg-username").value.trim();
+        const password = document.getElementById("reg-password").value;
+        const confirm  = document.getElementById("reg-confirm").value;
+
+        if (password !== confirm) {
+            setAuthMessage("reg-message", "Konfirmasi password tidak cocok.", "error");
+            return;
+        }
+
+        const result = registerUser(username, password);
+        if (!result.ok) {
+            setAuthMessage("reg-message", result.error, "error");
+            return;
+        }
+
+        // Arahkan ke tab Login dengan pesan sukses
+        switchAuthTab("login");
+        setAuthMessage("login-message", "✅ Akun berhasil dibuat! Silakan masuk.", "success");
+        document.getElementById("login-username").value = username;
+    };
+
+    // Submit dengan tombol Enter
+    document.getElementById("login-password").addEventListener("keydown", e => {
+        if (e.key === "Enter") window.handleLogin();
+    });
+    document.getElementById("reg-confirm").addEventListener("keydown", e => {
+        if (e.key === "Enter") window.handleRegister();
+    });
+
+
+    // ============================================================
+    // PROFILE DROPDOWN (Edit & Logout)
+    // ============================================================
+
+    window.toggleProfileDropdown = function() {
+        const dropdown = document.getElementById("profile-dropdown");
+        const btn      = document.getElementById("profile-btn");
+        const isOpen   = dropdown.style.display !== "none";
+        dropdown.style.display = isOpen ? "none" : "flex";
+        btn.setAttribute("aria-expanded", String(!isOpen));
+    };
+
+    window.closeProfileDropdown = function() {
+        document.getElementById("profile-dropdown").style.display = "none";
+        document.getElementById("profile-btn").setAttribute("aria-expanded", "false");
+    };
+
+    // Tutup dropdown saat klik di luar
+    document.addEventListener("click", (e) => {
+        const wrapper = document.getElementById("profile-dropdown-wrapper");
+        if (wrapper && !wrapper.contains(e.target)) closeProfileDropdown();
+    });
+
+    /** Logout: bersihkan sesi dan kembali ke halaman auth. */
+    window.handleLogout = function() {
+        closeProfileDropdown();
+        clearSession();
+        activeConvId     = null;
+        chatEl.innerHTML = "";
+        showWelcome();
+        showAuthOverlay();
+        switchAuthTab("login");
+    };
+
+
+    // ============================================================
+    // EDIT PROFILE MODAL
+    // ============================================================
+
+    window.openEditProfile = function() {
+        document.getElementById("edit-old-password").value    = "";
+        document.getElementById("edit-new-password").value    = "";
+        document.getElementById("edit-confirm-password").value = "";
+        document.getElementById("edit-profile-message").textContent = "";
+        editProfileOverlay.style.display = "flex";
+    };
+
+    window.closeEditProfile = function() {
+        editProfileOverlay.style.display = "none";
+    };
+
+    window.handleEditProfile = function() {
+        const session     = getSession();
+        const oldPassword = document.getElementById("edit-old-password").value;
+        const newPassword = document.getElementById("edit-new-password").value;
+        const confirmPw   = document.getElementById("edit-confirm-password").value;
+
+        const result = updatePassword(session?.username, oldPassword, newPassword, confirmPw);
+        if (!result.ok) {
+            setAuthMessage("edit-profile-message", result.error, "error");
+            return;
+        }
+
+        setAuthMessage("edit-profile-message", "✅ Password berhasil diperbarui!", "success");
+        setTimeout(() => window.closeEditProfile(), 1500);
+    };
+
+
+    // ============================================================
+    // FILE UPLOAD
+    // Validasi ukuran sebelum file diterima.
+    // ============================================================
+
+    const FILE_SIZE_LIMIT = {
+        document : 5  * 1024 * 1024,  // 5 MB untuk PDF & DOCX
+        image    : 10 * 1024 * 1024,  // 10 MB untuk gambar
+    };
+    const IMAGE_EXTENSIONS = ["jpg", "jpeg", "png"];
+
+    fileInput.addEventListener("change", () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        const ext     = file.name.split(".").pop().toLowerCase();
+        const isImage = IMAGE_EXTENSIONS.includes(ext);
+        const limit   = isImage ? FILE_SIZE_LIMIT.image : FILE_SIZE_LIMIT.document;
+
+        if (file.size > limit) {
+            const limitLabel = isImage ? "10 MB" : "5 MB";
+            const typeLabel  = isImage ? "gambar" : "PDF/DOCX";
+            showToast(
+                `File terlalu besar. Maksimal ${limitLabel} untuk ${typeLabel}.`,
+                "error", 7000
+            );
+            fileInput.value = "";
+            return;
+        }
+
+        selectedFile                = file;
+        filePreviewName.textContent = file.name;
+        filePreview.classList.add("file-preview--visible");
+    });
+
+    fileRemoveBtn.addEventListener("click", () => {
+        selectedFile = null;
+        fileInput.value = "";
+        filePreview.classList.remove("file-preview--visible");
+    });
+
+    /** Bersihkan state file setelah pesan terkirim. */
+    function resetFileInput() {
+        selectedFile = null;
+        fileInput.value = "";
+        filePreview.classList.remove("file-preview--visible");
+    }
+
+
+    // ============================================================
+    // SCROLL
+    // ============================================================
+
+    function scrollToBottom() {
+        chatEl.scrollTop = chatEl.scrollHeight;
+    }
+
+
+    // ============================================================
+    // CHAT BUBBLE: USER
+    // ============================================================
+
+    /**
+     * Tambahkan bubble pesan dari sisi user.
+     * @param {string} text - Teks pertanyaan.
+     * @param {string|null} fileName - Nama file yang diupload (jika ada).
+     */
+    function addUserBubble(text, fileName = null) {
+        const bubble = document.createElement("div");
+        bubble.className = "user-bubble";
+
+        if (fileName) {
+            const tag = document.createElement("div");
+            tag.className   = "file-tag";
+            tag.textContent = `📎 ${fileName}`;
+            bubble.appendChild(tag);
+        }
+
+        const span = document.createElement("span");
+        span.textContent = text;
+        bubble.appendChild(span);
+
+        chatEl.appendChild(bubble);
+        scrollToBottom();
+    }
+
+
+    // ============================================================
+    // CHAT BUBBLE: LOADING
+    // ============================================================
+
+    /** Tambahkan bubble animasi loading saat menunggu respons AI. */
+    function addLoadingBubble() {
+        const el = document.createElement("div");
+        el.className = "loading-bubble";
+        el.innerHTML = `
+            <div class="loading-dots">
+                <span></span><span></span><span></span>
+            </div>
+            <span class="loading-text">Sedang merenungkan...</span>
+        `;
+        chatEl.appendChild(el);
+        scrollToBottom();
+        return el;
+    }
+
+
+    // ============================================================
+    // TYPEWRITER EFFECT
+    // ============================================================
+
+    /**
+     * Animasi teks muncul satu karakter per interval (efek mengetik).
+     * @param {HTMLElement} element - Elemen yang akan diisi teks.
+     * @param {string} text - Teks yang akan diketik.
+     * @param {number} speed - Kecepatan antar karakter (ms).
+     * @param {Function} [onDone] - Callback setelah selesai.
+     */
+    function typeWrite(element, text, speed, onDone) {
+        let i = 0;
+        element.style.borderRight = ".12em solid var(--color-accent)";
+        element.style.animation   = "blink-caret .6s step-end infinite";
+
+        function tick() {
+            if (i < text.length) {
+                element.textContent += text[i++];
+                scrollToBottom();
+                setTimeout(tick, speed);
+            } else {
+                element.style.borderRight = "none";
+                element.style.animation   = "none";
+                onDone?.();
+            }
+        }
+
+        tick();
+    }
+
+
+    // ============================================================
+    // CHAT BUBBLE: HASIL AI (dengan typewriter — untuk respons baru)
+    // ============================================================
+
+    /**
+     * Tambahkan bubble hasil AI dengan efek typewriter.
+     * @param {Array<{heading: string, points: string[]}>} sections
+     */
+    function addResultBubble(sections) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "result-bubble";
+        wrapper.innerHTML = `
+            <div class="auth-logo">
+                <img src="/static/icon/mosque.png" alt="Logo Pojok Religi" width="32">
+            </div>
+            <div class="result-body">
+                <div class="result-label">Berikut Jawabannya!</div>
+                <div class="result-content"></div>
+            </div>
+        `;
+        chatEl.appendChild(wrapper);
+        scrollToBottom();
+
+        const body  = wrapper.querySelector(".result-content");
+        const queue = sections.flatMap(({ heading, points }, si) =>
+            points.map((point, pi) => ({
+                heading : pi === 0 ? heading : null,
+                point,
+                isLast  : si === sections.length - 1 && pi === points.length - 1,
+            }))
+        );
+
+        let currentList = null;
+
+        function renderNext(idx) {
+            if (idx >= queue.length) return;
+            const { heading, point, isLast } = queue[idx];
+
+            if (heading !== null) {
+                const h = document.createElement("div");
+                h.className   = "section-heading";
+                h.textContent = heading;
+                body.appendChild(h);
+
+                currentList = document.createElement("ul");
+                currentList.className = "section-list";
+                body.appendChild(currentList);
+                scrollToBottom();
+            }
+
+            const li   = document.createElement("li");
+            const span = document.createElement("span");
+            li.className = isLast ? "section-point section-point--interactive" : "section-point";
+            li.appendChild(span);
+            currentList.appendChild(li);
+            scrollToBottom();
+
+            typeWrite(span, point, 8, () => renderNext(idx + 1));
+        }
+
+        renderNext(0);
+    }
+
+
+    // ============================================================
+    // CHAT BUBBLE: HASIL AI STATIS (untuk memuat ulang riwayat)
+    // ============================================================
+
+    /**
+     * Tambahkan bubble hasil AI tanpa efek typewriter.
+     * Digunakan saat membuka percakapan dari riwayat.
+     * @param {Array<{heading: string, points: string[]}>} sections
+     */
+    function addResultBubbleStatic(sections) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "result-bubble";
+        wrapper.innerHTML = `
+            <div class="auth-logo">
+                <img src="/static/icon/mosque.png" alt="Logo Pojok Religi" width="32">
+            </div>
+            <div class="result-body">
+                <div class="result-label">Berikut Jawabannya!</div>
+                <div class="result-content"></div>
+            </div>
+        `;
+
+        const body = wrapper.querySelector(".result-content");
+
+        sections.forEach(({ heading, points }, si) => {
+            const h = document.createElement("div");
+            h.className   = "section-heading";
+            h.textContent = heading;
+            body.appendChild(h);
+
+            const ul = document.createElement("ul");
+            ul.className = "section-list";
+
+            points.forEach((point, pi) => {
+                const isLast = si === sections.length - 1 && pi === points.length - 1;
+                const li     = document.createElement("li");
+                const span   = document.createElement("span");
+                li.className    = isLast ? "section-point section-point--interactive" : "section-point";
+                span.textContent = point;
+                li.appendChild(span);
+                ul.appendChild(li);
+            });
+
+            body.appendChild(ul);
+        });
+
+        chatEl.appendChild(wrapper);
+    }
+
+
+    // ============================================================
+    // NORMALISE RESPONS API
+    // Pastikan data dari server selalu dalam format array sections.
+    // ============================================================
+
+    function normaliseSections(data) {
+        if (Array.isArray(data.answers))      return data.answers;
+        if (typeof data.answers === "string") return [{ heading: "Jawaban", points: [data.answers] }];
+        return [{ heading: "Ups!", points: ["Terjadi kesalahan, coba lagi."] }];
+    }
+
+
+    // ============================================================
+    // CONVERSATION MANAGEMENT
+    // CRUD percakapan menggunakan localStorage per user.
+    // ============================================================
+
+    /** Render ulang daftar percakapan di sidebar. */
+    function renderConvList() {
+        const convs = loadUserConvs();
+        convList.innerHTML = "";
+
+        if (convs.length === 0) {
+            convList.innerHTML = `<p class="sidebar-empty">Belum ada riwayat.</p>`;
+            return;
+        }
+
+        [...convs].reverse().forEach(({ id, title }) => {
+            const item = document.createElement("div");
+            item.className  = "conv-item";
+            item.dataset.id = id;
+            if (id === activeConvId) item.classList.add("conv-item--active");
+
+            item.innerHTML = `
+                <span class="conv-title" title="${title}">${title}</span>
+                <div class="conv-actions">
+                    <button class="conv-menu-btn" aria-label="Opsi percakapan">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="12" cy="5"  r="1.5"/>
+                            <circle cx="12" cy="12" r="1.5"/>
+                            <circle cx="12" cy="19" r="1.5"/>
+                        </svg>
+                    </button>
+                    <div class="conv-dropdown" style="display:none;">
+                        <button class="conv-dropdown-item conv-dropdown-item--danger">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            Hapus percakapan ini
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Klik judul → buka percakapan
+            item.querySelector(".conv-title").addEventListener("click", () => {
+                openConversation(id);
+                if (isMobile()) closeSidebar();
+            });
+
+            // Tombol titik tiga → toggle dropdown
+            const menuBtn  = item.querySelector(".conv-menu-btn");
+            const dropdown = item.querySelector(".conv-dropdown");
+
+            menuBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                document.querySelectorAll(".conv-dropdown").forEach(d => {
+                    if (d !== dropdown) d.style.display = "none";
+                });
+                dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
+            });
+
+            // Tombol hapus satu percakapan
+            item.querySelector(".conv-dropdown-item--danger").addEventListener("click", (e) => {
+                e.stopPropagation();
+                dropdown.style.display = "none";
+                deleteConversation(id);
+            });
+
+            convList.appendChild(item);
+        });
+
+        // Tutup semua dropdown percakapan saat klik di luar
+        document.addEventListener("click", () => {
+            document.querySelectorAll(".conv-dropdown").forEach(d => d.style.display = "none");
+        }, { once: true });
+    }
+
+    /** Buka dan tampilkan pesan dari percakapan yang tersimpan. */
+    function openConversation(id) {
+        const conv = loadUserConvs().find(c => c.id === id);
+        if (!conv) return;
+
+        activeConvId     = id;
+        chatEl.innerHTML = "";
+
+        conv.messages.forEach(({ role, content, fileName }) => {
+            if (role === "user") {
+                addUserBubble(content, fileName ?? null);
+            } else {
+                try   { addResultBubbleStatic(JSON.parse(content)); }
+                catch { addResultBubbleStatic([{ heading: "Jawaban", points: [content] }]); }
+            }
+        });
+
+        hideWelcome();
+        scrollToBottom();
+        renderConvList();
+    }
+
+    /** Hapus satu percakapan berdasarkan ID. */
+    function deleteConversation(id) {
+        const updated = loadUserConvs().filter(c => c.id !== id);
+        saveUserConvs(updated);
+
+        if (activeConvId === id) {
+            activeConvId     = null;
+            chatEl.innerHTML = "";
+            showWelcome();
+        }
+        renderConvList();
+    }
+
+    /** Tampilkan modal konfirmasi hapus semua. */
+    window.openDeleteAllModal = function() {
+        deleteAllOverlay.style.display = "flex";
+    };
+
+    window.closeDeleteAllModal = function() {
+        deleteAllOverlay.style.display = "none";
+    };
+
+    /** Hapus semua percakapan user yang sedang login. */
+    window.confirmDeleteAll = function() {
+        saveUserConvs([]);
+        activeConvId     = null;
+        chatEl.innerHTML = "";
+        showWelcome();
+        renderConvList();
+        closeDeleteAllModal();
+        showToast("Semua riwayat percakapan telah dihapus.", "info", 3000);
+    };
+
+    btnDeleteAll.addEventListener("click", () => window.openDeleteAllModal());
+
+
+    // ============================================================
+    // NEW CHAT
+    // ============================================================
+
+    btnNewChat.addEventListener("click", () => {
+        activeConvId     = null;
+        chatEl.innerHTML = "";
+        showWelcome();
+        renderConvList();
+        if (isMobile()) closeSidebar();
+        userInput.focus();
+    });
+
+
+    // ============================================================
+    // FORM SUBMIT — Kirim pesan ke AI
+    // ============================================================
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const text = userInput.value.trim();
+
+        // Validasi: tidak ada teks sama sekali
+        if (!text && !selectedFile) return;
+
+        // Validasi: ada file tapi pertanyaan kosong
+        if (!text && selectedFile) {
+            showToast("Tuliskan juga pertanyaanmu seputar dokumen yang diupload.", "info", 5000);
+            userInput.focus();
+            return;
+        }
+
+        hideWelcome();
+        addUserBubble(text, selectedFile?.name ?? null);
+
+        userInput.value    = "";
+        submitBtn.disabled = true;
+
+        const loadingEl = addLoadingBubble();
+
+        // Bangun history dari percakapan yang sedang aktif
+        const activeConv = loadUserConvs().find(c => c.id === activeConvId);
+        const history    = (activeConv?.messages || []).reduce((acc, msg, i, arr) => {
+            if (msg.role === "user" && arr[i + 1]?.role === "assistant") {
+                acc.push({
+                    user      : msg.content,
+                    assistant : arr[i + 1].rawJson || arr[i + 1].content,
+                });
+            }
+            return acc;
+        }, []);
+
+        try {
+            const formData = new FormData();
+            formData.append("input",   text);
+            formData.append("history", JSON.stringify(history));
+            if (selectedFile) formData.append("file", selectedFile);
+
+            const response = await fetch("/chat", { method: "POST", body: formData });
+
+            // Tangani HTTP error (413 = terlalu besar, 429 = rate limit)
+            if (!response.ok) {
+                loadingEl.remove();
+                const isCapacityError = [413, 429].includes(response.status);
+                showToast(
+                    isCapacityError
+                        ? "Dokumen terlalu besar atau server sedang kehabisan kapasitas. Coba lagi dalam beberapa saat."
+                        : `Gagal menghubungi server (HTTP ${response.status}). Coba lagi.`,
+                    "error", 8000
+                );
+                return;
+            }
+
+            const data = await response.json();
+            loadingEl.remove();
+
+            // Tangani error rate limit dari AI API
+            if (data.__error_type === "rate_limit") {
+                showToast(
+                    "Server sedang kehabisan kapasitas (rate limit). Tunggu beberapa saat lalu coba lagi.",
+                    "error", 8000
+                );
+                return;
+            }
+
+            const sections = normaliseSections(data);
+            const convs    = loadUserConvs();
+
+            if (activeConvId) {
+                // Tambahkan pesan ke percakapan yang sudah ada
+                const conv = convs.find(c => c.id === activeConvId);
+                if (conv) {
+                    conv.messages.push(
+                        { role: "user",      content: text,                     fileName: selectedFile?.name ?? null },
+                        { role: "assistant", content: JSON.stringify(sections), rawJson: data._raw ?? "" }
+                    );
+                }
+            } else {
+                // Buat percakapan baru
+                const newConv = {
+                    id       : uid(),
+                    title    : makeTitle(text),
+                    messages : [
+                        { role: "user",      content: text,                     fileName: selectedFile?.name ?? null },
+                        { role: "assistant", content: JSON.stringify(sections), rawJson: data._raw ?? "" },
+                    ],
+                };
+                convs.push(newConv);
+                activeConvId = newConv.id;
+            }
+
+            saveUserConvs(convs);
+            renderConvList();
+            addResultBubble(sections);
+
+        } catch (err) {
+            console.error("Fetch error:", err);
+            loadingEl.remove();
+            addResultBubble([{
+                heading : "Gagal Terhubung",
+                points  : ["Tidak dapat terhubung ke server. Pastikan server berjalan dan coba lagi."],
+            }]);
+
+        } finally {
+            submitBtn.disabled = false;
+            resetFileInput();
+        }
+    });
+
+
+    // ============================================================
+    // INISIALISASI APLIKASI
+    // ============================================================
+
+    showWelcome();
+    renderConvList();
+    initAuth();
+
+})();
+</script>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
+    crossorigin="anonymous"
+></script>
+</body>
+</html>
