@@ -5,7 +5,7 @@
 
 Asisten AI berbasis web untuk menjawab pertanyaan seputar agama, spiritualitas, dan kehidupan sehari-hari dari sudut pandang moral dan keagamaan.
 
-Dibangun menggunakan **Flask** + **Groq AI API** (LLaMA 3.3), dengan antarmuka yang responsif dan mendukung upload dokumen.
+Dibangun menggunakan Flask + Groq AI API (LLaMA 3.3), dengan antarmuka yang responsif dan mendukung upload dokumen.
 
 ---
 
