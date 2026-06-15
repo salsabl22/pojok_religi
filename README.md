@@ -11,12 +11,12 @@ Dibangun menggunakan Flask + Groq AI API (LLaMA 3.3), dengan antarmuka yang resp
 
 ## Fitur
 
--  **Chat AI** — Jawaban terstruktur dengan efek typewriter
--  **Autentikasi** — Login & Register berbasis localStorage (tanpa database)
--  **Multi-user** — Setiap user memiliki riwayat percakapan masing-masing
--  **Upload Dokumen** — Mendukung PDF, DOCX, JPG, PNG (maks. 5–10 MB)
--  **Dark / Light Mode** — Tema yang dapat diganti dan disimpan
--  **Responsif** — Sidebar collapsible, tampilan mobile-friendly
+-  **Chat AI** : Jawaban terstruktur dengan efek typewriter
+-  **Autentikasi** : Login & Register berbasis localStorage (tanpa database)
+-  **Multi-user** : Setiap user memiliki riwayat percakapan masing-masing
+-  **Upload Dokumen** : Mendukung PDF, DOCX, JPG, PNG (maks. 5–10 MB)
+-  **Dark / Light Mode** : Tema yang dapat diganti dan disimpan
+-  **Responsif** : Sidebar collapsible, tampilan mobile-friendly
 
 ---
 
