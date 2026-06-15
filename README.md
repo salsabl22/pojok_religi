@@ -1,4 +1,4 @@
-# 🕌 Pojok Religi
+# Pojok Religi
 
 <img width="400" alt="image (1)" src="https://github.com/user-attachments/assets/3102284c-2e0e-43ef-a985-af2929c0519d" />
 <img width="400" alt="image (2)" src="https://github.com/user-attachments/assets/af6cdb1a-9976-49ee-b7df-81e5d7b58f8e" />
@@ -9,22 +9,18 @@ Dibangun menggunakan **Flask** + **Groq AI API** (LLaMA 3.3), dengan antarmuka y
 
 ---
 
-## ✨ Fitur
+## Fitur
 
-- 💬 **Chat AI** — Jawaban terstruktur dengan efek typewriter
-- 🔐 **Autentikasi** — Login & Register berbasis localStorage (tanpa database)
-- 👤 **Multi-user** — Setiap user memiliki riwayat percakapan masing-masing
-- 📎 **Upload Dokumen** — Mendukung PDF, DOCX, JPG, PNG (maks. 5–10 MB)
-- 🌙 **Dark / Light Mode** — Tema yang dapat diganti dan disimpan
-- 📱 **Responsif** — Sidebar collapsible, tampilan mobile-friendly
-
-> **Catatan:** Autentikasi dan riwayat disimpan di `localStorage` browser.
-> Data hanya tersedia di perangkat dan browser yang sama.
-> Untuk deployment production, gunakan database (MySQL, PostgreSQL, dll).
+-  **Chat AI** — Jawaban terstruktur dengan efek typewriter
+-  **Autentikasi** — Login & Register berbasis localStorage (tanpa database)
+-  **Multi-user** — Setiap user memiliki riwayat percakapan masing-masing
+-  **Upload Dokumen** — Mendukung PDF, DOCX, JPG, PNG (maks. 5–10 MB)
+-  **Dark / Light Mode** — Tema yang dapat diganti dan disimpan
+-  **Responsif** — Sidebar collapsible, tampilan mobile-friendly
 
 ---
 
-## 🛠 Tech Stack
+##  Tech Stack
 
 | Layer    | Teknologi                          |
 |----------|------------------------------------|
@@ -35,7 +31,7 @@ Dibangun menggunakan **Flask** + **Groq AI API** (LLaMA 3.3), dengan antarmuka y
 
 ---
 
-## 🚀 Cara Menjalankan
+##  Cara Menjalankan
 
 ### 1. Clone & Setup
 
@@ -49,7 +45,7 @@ source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 2. Konfigurasi
+### 2. Configuration
 
 Buat file `.env` di root proyek:
 
@@ -60,56 +56,12 @@ SECRET_KEY=your-secret-key-here
 
 Dapatkan API key gratis di [console.groq.com](https://console.groq.com).
 
-### 3. Jalankan
+### 3. Run
 
 ```bash
 python run.py
 ```
 
-Buka browser: `http://localhost:5000`
+Browser: `http://localhost:5000`
 
 ---
-
-## 📁 Struktur Proyek
-
-```
-pojok-religi/
-├── app/
-│   ├── __init__.py          # Application factory
-│   ├── config.py            # Konfigurasi (env vars)
-│   ├── groq_client.py       # Integrasi Groq AI API
-│   ├── routes/
-│   │   ├── __init__.py      # Registrasi blueprint
-│   │   └── index_routes.py  # Route utama (/, /chat)
-│   ├── services/
-│   │   └── file_service.py  # Ekstraksi konten file upload
-│   └── templates/
-│       └── index.html       # SPA — UI + logika JavaScript
-├── static/
-│   ├── css/
-│   │   └── style.css        # Desain & tema (light/dark)
-│   └── icon/
-│       ├── mosque.png
-│       └── button_submit.png
-├── uploads/                 # Folder sementara file upload (auto-dibuat)
-├── .env                     # Variabel lingkungan (tidak di-commit)
-├── .gitignore
-├── requirements.txt
-├── run.py                   # Entry point
-└── README.md
-```
-
----
-
-## 📝 Catatan Pengembang
-
-- Seluruh logika JavaScript dikemas dalam satu **IIFE** untuk menghindari polusi global scope.
-- History percakapan disimpan per user dengan key `pojokreligi_convs_<username>` di localStorage.
-- AI hanya menjawab topik agama, spiritualitas, dan kehidupan — pertanyaan di luar topik akan ditolak dengan ramah.
-- File upload dihapus otomatis dari server setelah konten diekstrak.
-
----
-
-## 📄 Lisensi
-
-MIT License — bebas digunakan untuk portofolio dan pengembangan lebih lanjut.
