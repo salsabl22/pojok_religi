@@ -1,7 +1,7 @@
 # 🕌 Pojok Religi
 
-<img width="2668" height="1534" alt="image (1)" src="https://github.com/user-attachments/assets/3102284c-2e0e-43ef-a985-af2929c0519d" />
-<img width="2668" height="1534" alt="image (2)" src="https://github.com/user-attachments/assets/af6cdb1a-9976-49ee-b7df-81e5d7b58f8e" />
+<img width="400" alt="image (1)" src="https://github.com/user-attachments/assets/3102284c-2e0e-43ef-a985-af2929c0519d" />
+<img width="400" alt="image (2)" src="https://github.com/user-attachments/assets/af6cdb1a-9976-49ee-b7df-81e5d7b58f8e" />
 
 Asisten AI berbasis web untuk menjawab pertanyaan seputar agama, spiritualitas, dan kehidupan sehari-hari dari sudut pandang moral dan keagamaan.
 
