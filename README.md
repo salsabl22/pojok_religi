@@ -11,8 +11,7 @@ Dibangun menggunakan Flask + Groq AI API (LLaMA 3.3), dengan antarmuka yang resp
 
 ## Fitur
 
--  **Chat AI** : Jawaban terstruktur dengan efek typewriter
--  **Autentikasi** : Login & Register berbasis localStorage (tanpa database)
+-  **Chat AI** : Jawaban terstruktur berdasarkan prompting
 -  **Multi-user** : Setiap user memiliki riwayat percakapan masing-masing
 -  **Upload Dokumen** : Mendukung PDF, DOCX, JPG, PNG (maks. 5–10 MB)
 -  **Dark / Light Mode** : Tema yang dapat diganti dan disimpan
@@ -54,7 +53,7 @@ GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxxxxxxxxxxxx
 SECRET_KEY=your-secret-key-here
 ```
 
-Dapatkan API key gratis di [console.groq.com](https://console.groq.com).
+API key [console.groq.com](https://console.groq.com).
 
 ### 3. Run
 
